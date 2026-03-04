@@ -6,39 +6,49 @@ import os
 
 app = Flask(__name__)
 
-# Lista en memoria RAM (se borra al reiniciar el Repl)
-programacion = []
+# Memoria volátil
+biblioteca = []
 
-def ejecutar_musica(url):
-    # En Replit no podemos abrir 'webbrowser' porque es un servidor remoto.
-    # Imprimimos el log. Para que suene en TU PC, deberías tener la web abierta.
-    print(f"--- [ALERTA] Toca reproducir: {url} ---")
+def reproducir_logica(url):
+    # Esto imprime en la consola de Replit cuando la hora coincide
+    print(f"\n--- [EJECUTANDO] ---")
+    print(f"Hora: {time.strftime('%H:%M:%S')}")
+    print(f"Abriendo: {url}")
+    print(f"--------------------\n")
+    
+    # Nota: En Replit, para que "suene", el servidor debe tener 
+    # salida de audio configurada, lo cual es limitado.
+    # Esta función simula la activación del trigger.
 
-def scheduler_loop():
+def stop_logica():
+    print(f"--- [DETENIDO] Hora de cierre alcanzada ---")
+
+def worker_reloj():
     while True:
         schedule.run_pending()
-        time.sleep(5)
+        time.sleep(1)
 
 @app.route('/')
-def index():
-    return render_template('index.html', espacios=range(8))
+def home():
+    return render_template('index.html')
 
 @app.route('/programar', methods=['POST'])
 def programar():
     schedule.clear()
-    conteo = 0
     for i in range(8):
         url = request.form.get(f'url_{i}')
         inicio = request.form.get(f'inicio_{i}')
+        fin = request.form.get(f'fin_{i}')
         
         if url and inicio:
-            schedule.every().day.at(inicio).do(ejecutar_musica, url)
-            conteo += 1
-            
-    return f"<h1>Sincronizado: {conteo} canciones programadas.</h1><p>Revisa la consola de Replit.</p>"
+            schedule.every().day.at(inicio).do(reproducir_logica, url)
+            if fin:
+                schedule.every().day.at(fin).do(stop_logica)
+                
+    return "<h1>✅ Sistema Programado</h1><p>Revisa la consola de Replit para ver la ejecución.</p>"
 
-if __name__ == '__main__':
-    # Hilo para el reloj
-    threading.Thread(target=scheduler_loop, daemon=True).start()
-    # Replit necesita correr en 0.0.0.0
+if __name__ == "__main__":
+    # Iniciar el reloj en segundo plano
+    threading.Thread(target=worker_reloj, daemon=True).start()
+    # Ejecutar servidor web en el puerto de Replit
     app.run(host='0.0.0.0', port=8080)
