@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <title>Programador Musical</title>
+    <style>
+        :root { --primari: #1DB954; --fons: #121212; --targeta: #181818; }
+        body { font-family: sans-serif; background: var(--fons); color: white; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        .graella { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; width: 100%; max-width: 1000px; }
+        .targeta { background: var(--targeta); padding: 15px; border-radius: 10px; border: 1px solid #333; }
+        input { width: 100%; padding: 8px; margin: 5px 0; background: #282828; border: 1px solid #444; color: white; border-radius: 5px; box-sizing: border-box; }
+        button { background: var(--primari); color: white; border: none; padding: 15px 30px; border-radius: 30px; cursor: pointer; font-weight: bold; margin-top: 20px; }
+        #estat { margin-top: 20px; color: var(--primari); font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <h1>Programador de Cançons</h1>
+    <div class="graella" id="inputs">
+        <script>
+            for(let i=0; i<8; i++) {
+                document.write(`
+                    <div class="targeta" id="t-${i}">
+                        <h3>Espai ${i+1}</h3>
+                        <input type="text" id="u-${i}" placeholder="URL de la cançó">
+                        <input type="time" id="i-${i}">
+                        <input type="time" id="f-${i}">
+                    </div>
+                `);
+            }
+        </script>
+    </div>
+
+    <button id="btn" onclick="activar()">ACTIVAR PROGRAMACIÓ</button>
+    <div id="estat">Estat: Esperant dades...</div>
+
+<script>
+    let dades = [];
+    let finestres = {};
+
+    function activar() {
+        dades = [];
+        for(let i=0; i<8; i++) {
+            let u = document.getElementById(`u-${i}`).value.trim();
+            let inici = document.getElementById(`i-${i}`).value;
+            let fi = document.getElementById(`f-${i}`).value;
+            if(u && inici) dades.push({ id: i, url: u, inici: inici, fi: fi, estat: 'llest' });
+        }
+
+        if(dades.length === 0) {
+            alert("Escriu una URL i una hora d'inici.");
+            return;
+        }
+
+        document.getElementById('btn').disabled = true;
+        document.getElementById('btn').innerText = "SISTEMA ACTIU";
+        document.getElementById('estat').innerText = "Vigilant el rellotge...";
+        
+        // Desactivem inputs
+        document.querySelectorAll('input').forEach(el => el.disabled = true);
+
+        // Comprovem cada segon
+        setInterval(comprovar, 1000);
+    }
+
+    function comprovar() {
+        const ara = new Date();
+        const araH = ara.getHours().toString().padStart(2, '0') + ":" + 
+                     ara.getMinutes().toString().padStart(2, '0');
+
+        dades.forEach(d => {
+            // HORA D'OBRIR
+            if(araH === d.inici && d.estat === 'llest') {
+                console.log("Obrint espai " + d.id);
+                finestres[d.id] = window.open(d.url, '_blank');
+                d.estat = 'obert';
+                document.getElementById(`t-${d.id}`).style.borderColor = "#1DB954";
+                document.getElementById('estat').innerText = "Reproduint espai " + (d.id + 1);
+            }
+
+            // HORA DE TANCAR
+            if(araH === d.fi && d.estat === 'obert') {
+                if(finestres[d.id]) {
+                    finestres[d.id].close();
+                    delete finestres[d.id];
+                }
+                d.estat = 'acabat';
+                document.getElementById(`t-${d.id}`).style.borderColor = "#333";
+                document.getElementById('estat').innerText = "Espai " + (d.id + 1) + " tancat.";
+            }
+        });
+    }
+</script>
+</body>
+</html>
