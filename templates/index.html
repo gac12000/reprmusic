@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Replit Music Scheduler</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #121212; color: white; padding: 20px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+        .card { background: #1e1e1e; padding: 20px; border-radius: 12px; border: 1px solid #333; }
+        input { width: 100%; padding: 10px; margin: 10px 0; background: #282828; border: 1px solid #444; color: white; border-radius: 6px; box-sizing: border-box; }
+        button { background: #1db954; color: white; border: none; padding: 15px; width: 100%; border-radius: 30px; font-weight: bold; cursor: pointer; margin-top: 30px; font-size: 16px; }
+        button:hover { background: #1ed760; }
+        h1 { text-align: center; color: #1db954; }
+    </style>
+</head>
+<body>
+    <h1>🎵 Programador 8 Canales</h1>
+    <form action="/programar" method="post">
+        <div class="grid">
+            {% for i in espacios %}
+            <div class="card">
+                <h3>Opción {{ i + 1 }}</h3>
+                <input type="text" name="url_{{ i }}" placeholder="URL (YouTube/Spotify)">
+                <input type="time" name="inicio_{{ i }}">
+            </div>
+            {% endfor %}
+        </div>
+        <button type="submit">SINCRONIZAR CON REPLIT</button>
+    </form>
+</body>
+</html>
